@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using SampleImplementation.Common;
 using SampleImplementation.Examples.SendCampaign;
 using SampleImplementation.mailworxAPI;
@@ -44,7 +45,7 @@ namespace SampleImplementation {
         /// <summary>
         /// Runs the send campaign example.
         /// </summary>
-        public void RunExample() {
+        public async Task RunExample() {
             Console.WriteLine();
 
             // ### STEP 1 : Preparations ###
@@ -63,7 +64,7 @@ namespace SampleImplementation {
 
             // The key is the id of the profile where the subscribers have been imported to.
             // The value is a list of ids of the imported subscribers.
-            KeyValuePair<Guid, List<Guid>> importedData = import.ImportSubscribers(profileName);
+            KeyValuePair<Guid, List<Guid>> importedData = await import.ImportSubscribers(profileName);
 
             // ### STEP 2 : IMPORT ###
 
@@ -78,7 +79,7 @@ namespace SampleImplementation {
 
                 // The key is the id of the template.
                 // The value is the id of the campaign.
-                KeyValuePair<Guid, Guid> data = campaignCreator.CreateCampaign(importedData.Key, campaignName);
+                KeyValuePair<Guid, Guid> data = await campaignCreator.CreateCampaign(importedData.Key, campaignName);
 
                 // ### STEP 3 : CREATE CAMPAIGN ###
 
@@ -93,7 +94,7 @@ namespace SampleImplementation {
                     SectionCreator sectionCreator = new SectionCreator(_serviceAgent);
 
                     // Send the campaign, if all sections have been created.
-                    if (sectionCreator.GenerateSection(data.Value, data.Key)) {
+                    if (await sectionCreator.GenerateSection(data.Value, data.Key)) {
 
                         // ### STEP 4 : ADD SECTIONS TO CAMPAIGN ###
 
@@ -112,7 +113,7 @@ namespace SampleImplementation {
                         });
 
                         // Send the campaign
-                        SendCampaignResponse sendCampaignResponse = _serviceAgent.SendCampaign(sendCampaignRequest);
+                        SendCampaignResponse sendCampaignResponse = await _serviceAgent.SendCampaignAsync(sendCampaignRequest);
 
                         // ### STEP 5 : SEND CAMPAIGN ###
 

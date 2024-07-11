@@ -7,14 +7,15 @@
 ---     • UploadFileToMDB               https://www.eworx.at/doku/uploadfiletomdb/                                                              ---
 ---------------------------------------------------------------------------------------------------------------------------------------------------
  */
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using SampleImplementation.Common;
+using SampleImplementation.mailworxAPI;
 
 namespace SampleImplementation.Examples.SendCampaign {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using mailworxAPI;
-    using SampleImplementation.Common;
 
     /// <summary>
     /// This class will show you how sections can be added to a campaign in eMS.
@@ -47,14 +48,14 @@ namespace SampleImplementation.Examples.SendCampaign {
         /// or
         /// campaignId;campaignId must not be an empty guid!
         /// </exception>
-        public bool GenerateSection(Guid templateId, Guid campaignId) {
+        public async Task<bool> GenerateSection(Guid templateId, Guid campaignId) {
             if (templateId == Guid.Empty)
                 throw new ArgumentException("templateId", "templateId must not be an empty guid!");
             if (campaignId == Guid.Empty)
                 throw new ArgumentException("campaignId", "campaignId must not be an empty guid!");
 
             // Load all available section definitions for the given template
-            SectionDefinition[] sectionDefinitions = this.LoadSectionDefinitions(templateId);
+            SectionDefinition[] sectionDefinitions = await this.LoadSectionDefinitions(templateId);
             bool sectionsCreated = sectionDefinitions != null && sectionDefinitions.Length > 0;
 
             // If there are no section definitions we can't setup the campaign.
@@ -67,12 +68,12 @@ namespace SampleImplementation.Examples.SendCampaign {
                 if (definitionArticle != null) {
                     CreateSectionRequest createSectionRequest = _serviceAgent.CreateRequest(new CreateSectionRequest() {
                         Campaign = new Campaign { Guid = campaignId },
-                        Section = this.CreateArticleSection(definitionArticle)
+                        Section = await this.CreateArticleSection(definitionArticle)
                     });
 
                     // ### CREATE THE SECTION ###
 
-                    CreateSectionResponse response = _serviceAgent.CreateSection(createSectionRequest);
+                    CreateSectionResponse response = await _serviceAgent.CreateSectionAsync(createSectionRequest);
 
                     // ### CREATE THE SECTION ###
 
@@ -84,10 +85,10 @@ namespace SampleImplementation.Examples.SendCampaign {
                 if (definitionBanner != null) {
                     CreateSectionRequest createBanner = _serviceAgent.CreateRequest(new CreateSectionRequest() {
                         Campaign = new Campaign { Guid = campaignId },
-                        Section = this.CreateBannerSection(definitionBanner)
+                        Section = await this.CreateBannerSection(definitionBanner)
                     });
 
-                    CreateSectionResponse response = _serviceAgent.CreateSection(createBanner);
+                    CreateSectionResponse response = await _serviceAgent.CreateSectionAsync(createBanner);
 
                     sectionsCreated = sectionsCreated && response != null && response.Guid != Guid.Empty;
                 }
@@ -97,10 +98,10 @@ namespace SampleImplementation.Examples.SendCampaign {
                 if (definitionTwoColumn != null) {
                     CreateSectionRequest createTwoColumn = _serviceAgent.CreateRequest(new CreateSectionRequest() {
                         Campaign = new Campaign { Guid = campaignId },
-                        Section = this.CreateTwoColumnSection(definitionTwoColumn)
+                        Section = await this.CreateTwoColumnSection(definitionTwoColumn)
                     });
 
-                    CreateSectionResponse response = _serviceAgent.CreateSection(createTwoColumn);
+                    CreateSectionResponse response = await _serviceAgent.CreateSectionAsync(createTwoColumn);
 
                     sectionsCreated = sectionsCreated && response != null && response.Guid != Guid.Empty;
                 }
@@ -114,7 +115,7 @@ namespace SampleImplementation.Examples.SendCampaign {
         /// </summary>
         /// <param name="definitionTwoColumn">The two column definition.</param>
         /// <returns>Returnes the created two column section.</returns>
-        private Section CreateTwoColumnSection(SectionDefinition definitionTwoColumn) {
+        private async Task<Section> CreateTwoColumnSection(SectionDefinition definitionTwoColumn) {
             Section twoColoumn = new Section() {
                 Created = DateTime.Now,
                 SectionDefinitionName = definitionTwoColumn.Name,
@@ -124,7 +125,7 @@ namespace SampleImplementation.Examples.SendCampaign {
             List<Field> fieldsToAdd = new List<Field>();
             foreach (Field currentField in definitionTwoColumn.Fields) {
                 if (currentField.InternalName == "c2_l_img") {
-                    Guid fileId = this.UploadFile(Path.Combine(_assetsPath, "messaging.png"), "messaging.png");
+                    Guid fileId = await this.UploadFile(Path.Combine(_assetsPath, "messaging.png"), "messaging.png");
 
                     if (fileId != Guid.Empty) {
                         fieldsToAdd.Add(new MdbField() { InternalName = currentField.InternalName, UntypedValue = fileId.ToString() });
@@ -136,7 +137,7 @@ namespace SampleImplementation.Examples.SendCampaign {
 																														qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi." });
                 }
                 else if (currentField.InternalName == "c2_r_img") {
-                    Guid fileId = this.UploadFile(Path.Combine(_assetsPath, "events.png"), "events.png");
+                    Guid fileId = await this.UploadFile(Path.Combine(_assetsPath, "events.png"), "events.png");
 
                     if (fileId != Guid.Empty) {
                         fieldsToAdd.Add(new MdbField() { InternalName = currentField.InternalName, UntypedValue = fileId.ToString() });
@@ -160,7 +161,7 @@ namespace SampleImplementation.Examples.SendCampaign {
         /// </summary>
         /// <param name="definitionBanner">The banner definition.</param>
         /// <returns>Returnes the created banner section.</returns>
-        private Section CreateBannerSection(SectionDefinition definitionBanner) {
+        private async Task<Section> CreateBannerSection(SectionDefinition definitionBanner) {
             Section banner = new Section() {
                 Created = DateTime.Now,
                 SectionDefinitionName = definitionBanner.Name,
@@ -170,7 +171,7 @@ namespace SampleImplementation.Examples.SendCampaign {
             List<Field> fieldsToAdd = new List<Field>();
             foreach (Field currentField in definitionBanner.Fields) {
                 if (currentField.InternalName == "t_img") {
-                    Guid fileId = this.UploadFile(Path.Combine(_assetsPath, "logo.png"), "eMS-logo.png");
+                    Guid fileId = await this.UploadFile(Path.Combine(_assetsPath, "logo.png"), "eMS-logo.png");
 
                     if (fileId != Guid.Empty) {
                         fieldsToAdd.Add(new MdbField() { InternalName = currentField.InternalName, UntypedValue = fileId.ToString() });
@@ -197,7 +198,7 @@ namespace SampleImplementation.Examples.SendCampaign {
         /// </summary>
         /// <param name="definitionArticle">The section definition.</param>
         /// <returns>Returnes the created article section.</returns>
-        private Section CreateArticleSection(SectionDefinition definitionArticle) {
+        private async Task<Section> CreateArticleSection(SectionDefinition definitionArticle) {
 
             Section sectionArticle = new Section() {
                 Created = DateTime.Now,
@@ -227,7 +228,7 @@ namespace SampleImplementation.Examples.SendCampaign {
                 }
                 else if (currentField.InternalName == "a_img") {
                     // Upload the file from the given path to the eMS media data base.
-                    Guid fileId = this.UploadFile(Path.Combine(_assetsPath, "email.png"), "email.png");
+                    Guid fileId = await this.UploadFile(Path.Combine(_assetsPath, "email.png"), "email.png");
 
                     if (fileId != Guid.Empty) {
                         fieldsToAdd.Add(new MdbField() { InternalName = currentField.InternalName, UntypedValue = fileId.ToString() });
@@ -248,12 +249,12 @@ namespace SampleImplementation.Examples.SendCampaign {
         /// </summary>
         /// <param name="templateId">The template id.</param>
         /// <returns>Returns a array of section definitions for the given template.</returns>
-        private SectionDefinition[] LoadSectionDefinitions(Guid templateId) {
+        private async Task<SectionDefinition[]> LoadSectionDefinitions(Guid templateId) {
             SectionDefinitionRequest sectionDefinitionRequest = _serviceAgent.CreateRequest(new SectionDefinitionRequest() {
                 Template = new Template() { Guid = templateId }
             });
 
-            SectionDefinitionResponse sectionDefinitionResponse = _serviceAgent.GetSectionDefinitions(sectionDefinitionRequest);
+            SectionDefinitionResponse sectionDefinitionResponse = await _serviceAgent.GetSectionDefinitionsAsync(sectionDefinitionRequest);
 
             if (sectionDefinitionResponse == null)
                 return null;
@@ -310,13 +311,13 @@ namespace SampleImplementation.Examples.SendCampaign {
         /// <param name="path">The path where the file to upload is located.</param>
         /// <param name="fileName">Name of the file to upload.</param>
         /// <returns>Returns the id of the uploaded file.</returns>
-        private Guid UploadFile(string path, string fileName) {
+        private async Task<Guid> UploadFile(string path, string fileName) {
             // Get all files in the mdb for the directory mailworx.
             MediaDbRequest mediadbRequest = _serviceAgent.CreateRequest(new MediaDbRequest() {
                 Path = "marketing-suite"
             });
 
-            FileResponse fileResponse = _serviceAgent.GetMDBFiles(mediadbRequest);
+            FileResponse fileResponse = await _serviceAgent.GetMDBFilesAsync(mediadbRequest);
             Guid fileId = Guid.Empty;
 
             // Check if there is already a file with the given filename.
@@ -331,7 +332,7 @@ namespace SampleImplementation.Examples.SendCampaign {
                     Path = "marketing-suite" // The location within the eMS media database. If this path does not exist within the media data base, an exception will be thrown.
                 });
 
-                FileUploadResponse uploadResponse = _serviceAgent.UploadFileToMDB(uploadRequest);
+                FileUploadResponse uploadResponse = await _serviceAgent.UploadFileToMDBAsync(uploadRequest);
 
                 if (uploadResponse != null)
                     fileId = uploadResponse.FileId;

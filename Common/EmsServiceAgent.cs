@@ -1,14 +1,14 @@
 ﻿using SampleImplementation.mailworxAPI;
 
 namespace SampleImplementation.Common {
-    public class EmsServiceAgent : MailworxWebServiceAgent {
+    public class EmsServiceAgent : MailworxWebServiceAgentSoapClient {
         private SecurityContext _securityContext;
         private string _language = "EN";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EmsServiceAgent"/> class.
         /// </summary>
-        public EmsServiceAgent() {
+        public EmsServiceAgent() : base(EndpointConfiguration.MailworxWebServiceAgentSoap12) {
         }
 
 
@@ -18,7 +18,7 @@ namespace SampleImplementation.Common {
         /// <param name="serviceUrl">The service url.</param>
         /// <returns>The EmsServiceAgent instance.</returns>
         public EmsServiceAgent UseServiceUrl(string serviceUrl) {
-            this.Url = serviceUrl;
+            this.Endpoint.Address = new System.ServiceModel.EndpointAddress(serviceUrl);
 
             return this;
         }

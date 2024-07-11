@@ -1,8 +1,10 @@
-﻿namespace SampleImplementation.Common {
+﻿using System.Threading.Tasks;
+
+namespace SampleImplementation.Common {
     public interface IExample {
         /// <summary>
         /// Main method to run an example.
         /// </summary>
-        void RunExample();
+        Task RunExample();
     }
 }

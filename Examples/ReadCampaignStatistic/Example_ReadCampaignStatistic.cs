@@ -11,6 +11,7 @@
  */
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using SampleImplementation.Common;
 using SampleImplementation.mailworxAPI;
 
@@ -39,7 +40,7 @@ namespace SampleImplementation.Examples.ReadCampaignStatistic {
         /// <summary>
         /// Runs the campaign statistic example.
         /// </summary>
-        public void RunExample() {
+        public async Task RunExample() {
             Console.WriteLine();
 
             // Set the campaign id of the campaign you want to read statistic data of.
@@ -58,7 +59,7 @@ namespace SampleImplementation.Examples.ReadCampaignStatistic {
 
 
             // Read the common campaign information.
-            CampaignsResponse campaignInfo = _serviceAgent.GetCampaigns(campaignsRequest);
+            CampaignsResponse campaignInfo = await _serviceAgent.GetCampaignsAsync(campaignsRequest);
 
 
             // Get the first campaign
@@ -66,7 +67,7 @@ namespace SampleImplementation.Examples.ReadCampaignStatistic {
 
             if (campaign != null) {
                 // Print the campaign Info to the Console
-                this.PrintCampaignStatistics(campaign);
+                await this.PrintCampaignStatistics(campaign);
             };
         }
 
@@ -76,20 +77,20 @@ namespace SampleImplementation.Examples.ReadCampaignStatistic {
         /// Prints campaign statistics to the console.
         /// </summary>
         /// <param name="campaign">The campaign of which the statistics are printet to the console.</param>
-        private void PrintCampaignStatistics(Campaign campaign) {
-            this.PrintGeneralCampaignInfo(campaign);
-            this.PrintStatistics(campaign);
-            this.PrintBouncesInfo(campaign);
-            this.PrintClickratesInfo(campaign);
-            this.PrintOpeningRatesInfo(campaign);
-            this.PrintMailClientTypesInfo(campaign);
+        private async Task PrintCampaignStatistics(Campaign campaign) {
+            await this.PrintGeneralCampaignInfo(campaign);
+            await this.PrintStatistics(campaign);
+            await this.PrintBouncesInfo(campaign);
+            await this.PrintClickratesInfo(campaign);
+            await this.PrintOpeningRatesInfo(campaign);
+            await this.PrintMailClientTypesInfo(campaign);
         }
 
         /// <summary>
         /// Prints the campaign info to the console.
         /// </summary>
         /// <param name="campaign">The campaign to print to the console</param>
-        private void PrintGeneralCampaignInfo(Campaign campaign) {
+        private Task PrintGeneralCampaignInfo(Campaign campaign) {
             Console.WriteLine($"General info of {campaign.Name}, created {campaign.Created}");
             Console.WriteLine("************************************************************");
             Console.WriteLine($"Subject: {campaign.Subject}");
@@ -100,19 +101,21 @@ namespace SampleImplementation.Examples.ReadCampaignStatistic {
             Console.WriteLine($"Notify address: {campaign.NotifyAddress}");
             Console.WriteLine("************************************************************");
             Console.WriteLine();
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
         /// Prints the campaign statistics to the console.
         /// </summary>
         /// <param name="campaign">The campaign to print to the console.</param>
-        private void PrintStatistics(Campaign campaign) {
+        private async Task PrintStatistics(Campaign campaign) {
             // Create a statistics request with the campaignId.
             CampaignStatisticsRequest statisticsRequest = _serviceAgent.CreateRequest(new CampaignStatisticsRequest() {
                 CampaignGuid = campaign.Guid
             });
 
-            CampaignStatisticsResponse campaignStatisticsInfo = _serviceAgent.GetCampaignStatistics(statisticsRequest);
+            CampaignStatisticsResponse campaignStatisticsInfo = await _serviceAgent.GetCampaignStatisticsAsync(statisticsRequest);
 
             Console.WriteLine($"Campaign statistics of {campaign.Name}");
             Console.WriteLine("************************************************************");
@@ -129,12 +132,12 @@ namespace SampleImplementation.Examples.ReadCampaignStatistic {
         /// </summary>
         /// <param name="campaign"></param>
         /// <exception cref="NotImplementedException">The campaign to print to the console.</exception>
-        private void PrintBouncesInfo(Campaign campaign) {
+        private async Task PrintBouncesInfo(Campaign campaign) {
             CampaignBounceRequest bounceRequest = _serviceAgent.CreateRequest(new CampaignBounceRequest() {
                 CampaignGuid = campaign.Guid
             });
 
-            CampaignBounceResponse bounceInfo = _serviceAgent.GetBouncesOfCampaign(bounceRequest);
+            CampaignBounceResponse bounceInfo = await _serviceAgent.GetBouncesOfCampaignAsync(bounceRequest);
 
             Console.WriteLine($"Bounces statistics of {campaign.Name}");
             Console.WriteLine("************************************************************");
@@ -150,12 +153,12 @@ namespace SampleImplementation.Examples.ReadCampaignStatistic {
         /// Prints the click rates info to the console.
         /// </summary>
         /// <param name="campaign">The campaign to print to the console.</param>
-        private void PrintClickratesInfo(Campaign campaign) {
+        private async Task PrintClickratesInfo(Campaign campaign) {
             CampaignClickRatesRequest clickRatesRequest = _serviceAgent.CreateRequest(new CampaignClickRatesRequest() {
                 CampaignGuid = campaign.Guid
             });
 
-            CampaignClickRatesResponse clickRatesInfo = _serviceAgent.GetClickRatesOfCampaign(clickRatesRequest);
+            CampaignClickRatesResponse clickRatesInfo = await _serviceAgent.GetClickRatesOfCampaignAsync(clickRatesRequest);
 
             Console.WriteLine($"Click rates statistics of {campaign.Name}");
             Console.WriteLine("************************************************************");
@@ -174,12 +177,12 @@ namespace SampleImplementation.Examples.ReadCampaignStatistic {
         /// Prints the opening rates info to the console.
         /// </summary>
         /// <param name="campaign">The campaign to print to the console.</param>
-        private void PrintOpeningRatesInfo(Campaign campaign) {
+        private async Task PrintOpeningRatesInfo(Campaign campaign) {
             CampaignOpeningRatesRequest openingRatesRequest = _serviceAgent.CreateRequest(new CampaignOpeningRatesRequest() {
                 CampaignGuid = campaign.Guid
             });
 
-            CampaignOpeningRatesResponse openingRatesInfo = _serviceAgent.GetOpeningRatesOfCampaign(openingRatesRequest);
+            CampaignOpeningRatesResponse openingRatesInfo = await _serviceAgent.GetOpeningRatesOfCampaignAsync(openingRatesRequest);
 
             Console.WriteLine($"Opening rates statistics of {campaign.Name}");
             Console.WriteLine("************************************************************");
@@ -198,12 +201,12 @@ namespace SampleImplementation.Examples.ReadCampaignStatistic {
         /// Prints the mail client types to the console.
         /// </summary>
         /// <param name="campaign">The campaign to print to the console.</param>
-        private void PrintMailClientTypesInfo(Campaign campaign) {
+        private async Task PrintMailClientTypesInfo(Campaign campaign) {
             MailClientTypesRequest mailClientRequest = _serviceAgent.CreateRequest(new MailClientTypesRequest() {
                 CampaignId = campaign.Guid
             });
 
-            MailClientTypesResponse mailClientTypeInfo = _serviceAgent.GetMailClientTypesOfCampaign(mailClientRequest);
+            MailClientTypesResponse mailClientTypeInfo = await _serviceAgent.GetMailClientTypesOfCampaignAsync(mailClientRequest);
 
             Console.WriteLine($"Mail client types info of {campaign.Name}");
             Console.WriteLine("************************************************************");

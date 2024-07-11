@@ -22,15 +22,5 @@ namespace SampleImplementation.Properties {
                 return defaultInstance;
             }
         }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://mailworx.marketingsuite.info/services/serviceagent.asmx")]
-        public string SampleImplementation_mailworxAPI_MailworxWebServiceAgent {
-            get {
-                return ((string)(this["SampleImplementation_mailworxAPI_MailworxWebServiceAgent"]));
-            }
-        }
     }
 }

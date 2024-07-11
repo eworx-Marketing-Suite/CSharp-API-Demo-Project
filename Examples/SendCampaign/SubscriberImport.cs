@@ -6,13 +6,14 @@
 ---     • GetProfiles                   https://www.eworx.at/doku/getprofiles/                                                                  ---
 ---------------------------------------------------------------------------------------------------------------------------------------------------
  */
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using SampleImplementation.Common;
+using SampleImplementation.mailworxAPI;
 
 namespace SampleImplementation.Examples.SendCampaign {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using mailworxAPI;
-    using SampleImplementation.Common;
 
     /// <summary>
     /// This class will show you how subscribers can be imported into eMS.
@@ -39,7 +40,7 @@ namespace SampleImplementation.Examples.SendCampaign {
         /// </summary>
         /// <param name="profileName">The profile name of the subscriber.</param>
         /// <returns>Returns a KeyValuePair. The key is the profile id and the value is a list of ids of the imported subscribers.</returns>
-        public KeyValuePair<Guid, List<Guid>> ImportSubscribers(string profileName) {
+        public async Task<KeyValuePair<Guid, List<Guid>>> ImportSubscribers(string profileName) {
 
             // Create a new import request.
             SubscriberImportRequest importRequest = _serviceAgent.CreateRequest(new SubscriberImportRequest());
@@ -48,7 +49,7 @@ namespace SampleImplementation.Examples.SendCampaign {
             // Here we handle the profile that will be used as target group later.
 
             // Load the profile with the given name from the eMS.
-            Profile profile = this.LoadProfile(profileName);
+            Profile profile = await this.LoadProfile(profileName);
 
             // If there is already a profile for the given name, all subscribers of this group have to be removed.
             if (profile != null) {
@@ -72,7 +73,7 @@ namespace SampleImplementation.Examples.SendCampaign {
             // ### HANDLE LIST OF SUBSCRIBERS ###
 
             // Get some sample subscribers to import.
-            importRequest.Subscribers = this.GetSubscribers();
+            importRequest.Subscribers = await this.GetSubscribers();
 
             // ### HANDLE LIST OF SUBSCRIBERS ###
 
@@ -92,7 +93,7 @@ namespace SampleImplementation.Examples.SendCampaign {
             // ### DO THE IMPORT ###
 
             // Import the data by calling the webservice method.
-            SubscriberImportResponse importResponse = _serviceAgent.ImportSubscribers(importRequest);
+            SubscriberImportResponse importResponse = await _serviceAgent.ImportSubscribersAsync(importRequest);
 
             // ### DO THE IMPORT ###
 
@@ -132,7 +133,7 @@ namespace SampleImplementation.Examples.SendCampaign {
 
             // If the profile did not exist at the the first iteration we can now load it.
             if (profile == null) {
-                profile = this.LoadProfile(profileName);
+                profile = await this.LoadProfile(profileName);
             }
 
             // ### HANDLE THE IMPORT RESPONSE ###
@@ -144,7 +145,7 @@ namespace SampleImplementation.Examples.SendCampaign {
         /// Gets the subscriber fields of the account which has been set in the security context.
         /// </summary>
         /// <returns>Returns an array of subscriber fields for the given account.</returns>
-        public Field[] GetFieldsOfAccount() {
+        public async Task<Field[]> GetFieldsOfAccount() {
             SubscriberFieldRequest fieldRequest = _serviceAgent.CreateRequest(new SubscriberFieldRequest());
 
             // MetaInformation -> Will return predefined fields like tel.nr., email, firstname, lastname, ...
@@ -155,7 +156,7 @@ namespace SampleImplementation.Examples.SendCampaign {
 
             SubscriberFieldResponse subscriberFieldResponse = null;
             try {
-                subscriberFieldResponse = _serviceAgent.GetSubscriberFields(fieldRequest);
+                subscriberFieldResponse = await _serviceAgent.GetSubscriberFieldsAsync(fieldRequest);
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.ToString());
@@ -198,7 +199,7 @@ namespace SampleImplementation.Examples.SendCampaign {
         /// Get some sample subscriber for the import.
         /// </summary>
         /// <returns>Returns an array of subscribers.</returns>
-        private Subscriber[] GetSubscribers() {
+        private async Task<Subscriber[]> GetSubscribers() {
 
             // We build some new sample subscribers here.
 
@@ -239,7 +240,7 @@ namespace SampleImplementation.Examples.SendCampaign {
             // Here we set some custom data fields for this subscriber.
 
             // If you want to know which fields are available for your account, then call the following method: 
-            this.GetFieldsOfAccount();
+            await this.GetFieldsOfAccount();
 
             /*
 			 * Beware: The internal name and the concrete object type of the field has to match the configuration in eMS.
@@ -386,14 +387,14 @@ namespace SampleImplementation.Examples.SendCampaign {
         /// </summary>
         /// <param name="profileName">The name of the profile to load.</param>
         /// <returns>The profile or null if the profile name was not found.</returns>
-        private Profile LoadProfile(string profileName) {
+        private async Task<Profile> LoadProfile(string profileName) {
             ProfilesRequest profileRequest = _serviceAgent.CreateRequest(new ProfilesRequest() {
                 Type = ProfileType.Static
             });
 
 
             try {
-                ProfilesResponse profileResponse = _serviceAgent.GetProfiles(profileRequest);
+                ProfilesResponse profileResponse = await _serviceAgent.GetProfilesAsync(profileRequest);
 
                 if (profileResponse != null) {
                     // Search the profile with the given name.

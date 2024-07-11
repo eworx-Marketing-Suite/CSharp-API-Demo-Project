@@ -17,21 +17,22 @@
 ---     • CreateSection                 https://www.eworx.at/doku/createsection                                                                 ---
 ---     • SendCampaign                  https://www.eworx.at/doku/sendcampaign/                                                                 ---
 ---     • SendTriggerMails              https://www.eworx.at/doku/sendtriggermails                                                              ---
+---     • GetMDBFiles                   https://www.eworx.at/doku/getmdbfiles/                                                                  ---
+---     • UploadFileToMDB               https://www.eworx.at/doku/uploadfiletomdb/                                                              ---
 ---------------------------------------------------------------------------------------------------------------------------------------------------
  */
 
 using System;
+using System.Threading.Tasks;
 using SampleImplementation.Common;
 using SampleImplementation.Examples.ReadCampaignStatistic;
 using SampleImplementation.Examples.SendTriggerMail;
-using SampleImplementation.mailworxAPI;
 
 namespace SampleImplementation {
     public static class Program {
 
-        private static SecurityContext _securityContext = null;
+        static async Task Main(string[] args) {
 
-        static void Main(string[] args) {
             // This is the eMS service agent which will be used as connection to the mailworx webservice.
             // Sets up SecurityContext and Language, since both are always need to be sent in a request.
             EmsServiceAgent emsServiceAgent = new EmsServiceAgent()
@@ -72,6 +73,7 @@ namespace SampleImplementation {
                         example = new Example_ReadCampaignStatistic(emsServiceAgent);
                         break;
                     case ConsoleKey.C:
+
                         example = new Example_TriggerMail(emsServiceAgent);
                         break;
                     case ConsoleKey.Escape:
@@ -81,7 +83,7 @@ namespace SampleImplementation {
                         break;
                 }
                 if (running && example != null) {
-                    example.RunExample();
+                    await example.RunExample();
                 }
             }
         }

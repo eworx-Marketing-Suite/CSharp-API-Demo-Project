@@ -4,11 +4,14 @@
 ---     • SendTriggerMails                  https://www.eworx.at/doku/sendtriggermails                                                          ---
 ---     • GetCampaigns                      https://www.eworx.at/doku/getcampaigns/                                                             ---
 ---     • GetSectionDefinitions             https://www.eworx.at/doku/getsectiondefinitions/                                                    ---
+---     • GetMDBFilesAsync                  https://www.eworx.at/doku/getmdbfiles/                                                              ---
+---     • UploadFileToMDBAsync              https://www.eworx.at/doku/uploadfiletomdb/                                                          ---
 ---------------------------------------------------------------------------------------------------------------------------------------------------
  */
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using SampleImplementation.Common;
 using SampleImplementation.mailworxAPI;
 
@@ -37,7 +40,7 @@ namespace SampleImplementation.Examples.SendTriggerMail {
         /// <summary>
         /// Runs the send trigger mail example.
         /// </summary>
-        public void RunExample() {
+        public async Task RunExample() {
             Console.WriteLine();
 
             // Set the campaign id and the subsrciber id here.
@@ -48,7 +51,7 @@ namespace SampleImplementation.Examples.SendTriggerMail {
 
             SendTriggerMailsRequest sendTriggerMailsRequest = _serviceAgent.CreateRequest(new SendTriggerMailsRequest() {
                 CampaignId = campaignId,
-                TriggerMails = new TriggerMail[] { GetTriggerMail(campaignId, subscriberId) },
+                TriggerMails = new TriggerMail[] { await GetTriggerMail(campaignId, subscriberId) },
                 // TriggerMailIds don't need to be set.
                 TriggerMailIds = null,
                 // Read the documentation for the following options here: https://www.eworx.at/doku/sendtriggermails/
@@ -61,7 +64,12 @@ namespace SampleImplementation.Examples.SendTriggerMail {
 
             // Send out the trigger mail.
 
-            SendTriggerMailsResponse triggerMailsResponse = _serviceAgent.SendTriggerMails(sendTriggerMailsRequest);
+            SendTriggerMailsResponse triggerMailsResponse = await _serviceAgent.SendTriggerMailsAsync(sendTriggerMailsRequest);
+            if (triggerMailsResponse != null) {
+                Console.WriteLine("Trigger mail was sent succesfully.");
+            }
+
+            Console.WriteLine();
         }
 
 
@@ -71,13 +79,13 @@ namespace SampleImplementation.Examples.SendTriggerMail {
         /// <param name="campaignId">The campaign id.</param>
         /// <param name="subscriberId">The subscriber id.</param>
         /// <returns></returns>
-        private TriggerMail GetTriggerMail(Guid campaignId, Guid subscriberId) {
+        private async Task<TriggerMail> GetTriggerMail(Guid campaignId, Guid subscriberId) {
             // Create a new triggerMail.
 
             TriggerMail triggerMail = new TriggerMail() {
                 SubscriberId = subscriberId,
                 // Here the sections are set.
-                Sections = GenerateSections(campaignId),
+                Sections = await GenerateSections(campaignId),
                 // Here the custom text will be inserted.
                 Data = new TriggerMailData[] {
                     new TriggerMailData() {
@@ -99,7 +107,7 @@ namespace SampleImplementation.Examples.SendTriggerMail {
         /// </summary>
         /// <param name="campaignId">The id of the campaign.</param>
         /// <returns></returns>
-        private Section[] GenerateSections(Guid campaignId) {
+        private async Task<Section[]> GenerateSections(Guid campaignId) {
             // Create a new campaign request.
             CampaignsRequest campaignsRequest = _serviceAgent.CreateRequest(new CampaignsRequest() {
                 Id = campaignId,
@@ -111,7 +119,7 @@ namespace SampleImplementation.Examples.SendTriggerMail {
             });
 
             // Gets the campaigns.
-            CampaignsResponse campaignsResponse = _serviceAgent.GetCampaigns(campaignsRequest);
+            CampaignsResponse campaignsResponse = await _serviceAgent.GetCampaignsAsync(campaignsRequest);
 
             Guid templateId = campaignsResponse.Campaigns.First().TemplateGuid;
 
@@ -120,7 +128,7 @@ namespace SampleImplementation.Examples.SendTriggerMail {
                     Template = new Template() { Guid = templateId }
                 });
 
-                SectionDefinitionResponse sectionDefinitionResponse = _serviceAgent.GetSectionDefinitions(sectionDefinitionRequest);
+                SectionDefinitionResponse sectionDefinitionResponse = await _serviceAgent.GetSectionDefinitionsAsync(sectionDefinitionRequest);
 
                 SectionDefinition[] sectionDefinitions = sectionDefinitionResponse.SectionDefinitions;
 
@@ -128,7 +136,7 @@ namespace SampleImplementation.Examples.SendTriggerMail {
                     // Gets the section where the custom data will be set.
                     SectionDefinition definitionArticle = sectionDefinitions.FirstOrDefault(s => s.Name.Equals("Artikel", StringComparison.InvariantCultureIgnoreCase));
 
-                    return new Section[] { CreateArticleSection(definitionArticle) };
+                    return new Section[] { await CreateArticleSection(definitionArticle) };
                 }
             }
 
@@ -140,7 +148,7 @@ namespace SampleImplementation.Examples.SendTriggerMail {
         /// </summary>
         /// <param name="sectionDefinition">The section definition.</param>
         /// <returns></returns>
-        private Section CreateArticleSection(SectionDefinition sectionDefinition) {
+        private async Task<Section> CreateArticleSection(SectionDefinition sectionDefinition) {
             // Create a new section.
             Section sectionArticle = new Section() {
                 Created = DateTime.Now,
@@ -154,7 +162,7 @@ namespace SampleImplementation.Examples.SendTriggerMail {
             };
 
             // Upload the file from the given path to the eMS media data base.
-            Guid fileId = this.UploadFile(Path.Combine(_assetsPath, "email.png"), "email.png");
+            Guid fileId = await this.UploadFile(Path.Combine(_assetsPath, "email.png"), "email.png");
 
             MdbField imgField = new MdbField() {
                 InternalName = "a_img",
@@ -179,13 +187,13 @@ namespace SampleImplementation.Examples.SendTriggerMail {
         /// <param name="path">The path where the file to upload is located.</param>
         /// <param name="fileName">Name of the file to upload.</param>
         /// <returns>Returns the id of the uploaded file.</returns>
-        private Guid UploadFile(string path, string fileName) {
+        private async Task<Guid> UploadFile(string path, string fileName) {
             // Get all files in the mdb for the directory mailworx.
             MediaDbRequest mediadbRequest = _serviceAgent.CreateRequest(new MediaDbRequest() {
                 Path = "marketing-suite"
             });
 
-            FileResponse fileResponse = _serviceAgent.GetMDBFiles(mediadbRequest);
+            FileResponse fileResponse = await _serviceAgent.GetMDBFilesAsync(mediadbRequest);
             Guid fileId = Guid.Empty;
 
             // Check if there is already a file with the given filename.
@@ -200,7 +208,7 @@ namespace SampleImplementation.Examples.SendTriggerMail {
                     Path = "marketing-suite" // The location within the eMS media database. If this path does not exist within the media data base, an exception will be thrown.
                 });
 
-                FileUploadResponse uploadResponse = _serviceAgent.UploadFileToMDB(uploadRequest);
+                FileUploadResponse uploadResponse = await _serviceAgent.UploadFileToMDBAsync(uploadRequest);
 
                 if (uploadResponse != null)
                     fileId = uploadResponse.FileId;

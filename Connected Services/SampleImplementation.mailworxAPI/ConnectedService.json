@@ -1,0 +1,19 @@
+{
+  "ExtendedData": {
+    "inputs": [
+      "https://mailworx.marketingsuite.info/services/serviceagent.asmx"
+    ],
+    "collectionTypes": [
+      "System.Array",
+      "System.Collections.Generic.Dictionary`2"
+    ],
+    "namespaceMappings": [
+      "*, SampleImplementation.mailworxAPI"
+    ],
+    "references": [
+      "System.Data.DataSetExtensions, {System.Data.DataSetExtensions, 4.5.0}"
+    ],
+    "targetFramework": "net8.0",
+    "typeReuseMode": "All"
+  }
+}
