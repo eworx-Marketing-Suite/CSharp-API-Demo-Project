@@ -93,14 +93,8 @@ namespace SampleImplementation.Examples.SendCampaign {
 
                 CampaignsResponse response = await _serviceAgent.GetCampaignsAsync(campaignRequest);
                 Campaign[] loadedCampaigns = response.Campaigns;
-                Campaign existingCampaign = loadedCampaigns.FirstOrDefault(c => c.Name.Equals(campaignName, StringComparison.OrdinalIgnoreCase));
 
-                if (existingCampaign == null) {
-                    return loadedCampaigns.FirstOrDefault(c => c.Name.Equals(campaignName, StringComparison.OrdinalIgnoreCase));
-                }
-                else {
-                    return existingCampaign;
-                }
+                return loadedCampaigns.FirstOrDefault(c => c.Name.Equals(campaignName, StringComparison.OrdinalIgnoreCase));
             }
         }
 

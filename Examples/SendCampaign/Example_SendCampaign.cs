@@ -108,7 +108,7 @@ namespace SampleImplementation {
                             // If the SendType is set to Manual, ManualSendSettings are needed
                             // If the SendType is set to ABSplit, ABSplitTestSendSettings are needed
                             Settings = new ManualSendSettings() { SendTime = DateTime.Now },
-                            UseIRated = false, // Here is some more info about iRated http://www.mailworx.info/en/irated-technology
+                            UseIRated = false, // Here is some more info about iRated https://www.eworx.at/doku/so-funktioniert-irated/
                             UseRTR = true
                         });
 
