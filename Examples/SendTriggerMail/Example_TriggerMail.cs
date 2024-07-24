@@ -158,6 +158,7 @@ namespace SampleImplementation.Examples.SendTriggerMail {
 
             TextField textField = new TextField() {
                 InternalName = "a_text",
+                // [%mwtm:description%] will be replaced with the given trigger mail data with key "description".
                 UntypedValue = "This is some text in the trigger mail: [%mwtm:description%]"
             };
 
