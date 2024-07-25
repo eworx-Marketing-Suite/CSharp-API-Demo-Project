@@ -25,3 +25,7 @@ In the [SectionCreator](./SectionCreator.cs) class you generate the content sect
 ## 4. Send the campaign to the imported subscribers
 
 Create a request to send the created campaign.
+
+After the campaign is sent, you should see the preview of the content in the campaign.
+
+![Sent campaign preview](../../Screenshots/SentCampaignPreview.PNG)

@@ -1,4 +1,4 @@
-# CSharp-API-Demo-Project
+﻿# CSharp-API-Demo-Project
 Sample implementation for consuming eworx Marketing Suite (eMS) API.
 
 This demo project shows how to consume the eMS SOAP API, how to create and send campaigns, read statistic data and send a trigger mail.
@@ -27,6 +27,25 @@ First, create a ServiceAgent with the url to our webservice and your credentials
 | Username      | User name to use to login                              |
 | Password      | The user's password                                    |
 | Application   | The name of the registered application                 |
+
+##### EmsServiceAgent and a simple request
+```cs
+// C# demo code to create an eMS ServiceAgent
+EmsServiceAgent serviceAgent = new EmsServiceAgent()
+    .UseServiceUrl("https://mailworx.marketingsuite.info/services/serviceagent.asmx")
+                    // Url to the eMS service.
+                    // Not required, default value "https://mailworx.marketingsuite.info/services/serviceagent.asmx"
+    .UseLanguage("EN")     // Language of the text values ​​returned. Not required, default value is "EN"
+    .UseCredentials(
+        "[Account]",        // account name (Mandant) of the eMS to login
+        "[Username]",       // user name to use to login
+        "[Password]",       // the user's password
+        "[Application]"     // the name of the registered application
+    );
+
+// create simple request
+serviceAgent.CreateRequest(new CampaignsRequest());
+```
 
 ## 2. Examples
 
